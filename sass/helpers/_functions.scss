@@ -1,0 +1,10 @@
+@import "variables";
+@function pixel-to-em($px-size, $default-size: $font-size-body-default-px-sans){
+  $em-size: $px-size/$default-size;
+  @return $em-size;
+}
+
+@function pixel-to-em-final($px-size, $default-size: $font-size-body-default-px-sans){
+  $em-size: $px-size/$default-size;
+  @return $em-size * 1em;
+}

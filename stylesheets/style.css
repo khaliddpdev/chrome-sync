@@ -1,0 +1,57 @@
+@font-face {
+  font-family: 'fontello';
+  src: url("../fonts/fontello.eot?2865792");
+  src: url("../fonts/fontello.eot?2865792#iefix") format("embedded-opentype"), url("../fonts/fontello.woff?2865792") format("woff"), url("../fonts/fontello.ttf?2865792") format("truetype"), url("../fonts/fontello.svg?2865792#fontello") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+/*	==================================================
+	Main
+	==================================================  */
+/* line 7, ../sass/base/_main.scss */
+body {
+  -moz-animation: fadeInDown 400ms ease;
+  -webkit-animation: fadeInDown 400ms ease;
+  animation: fadeInDown 400ms ease;
+  width: 30em;
+}
+@-moz-keyframes fadeInDown {
+  0% {
+    -moz-transform: translateY(-20px);
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  100% {
+    -moz-transform: translateY(0);
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@-webkit-keyframes fadeInDown {
+  0% {
+    -webkit-transform: translateY(-20px);
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  100% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes fadeInDown {
+  0% {
+    -moz-transform: translateY(-20px);
+    -ms-transform: translateY(-20px);
+    -webkit-transform: translateY(-20px);
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  100% {
+    -moz-transform: translateY(0);
+    -ms-transform: translateY(0);
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

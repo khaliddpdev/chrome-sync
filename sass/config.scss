@@ -1,0 +1,16 @@
+@import "compass";
+@import "helpers/variables";
+
+@function print-breakpoints(){
+  @return '
+  %{
+    "mobile" : "#{$breakpoint-mobile-px-sans}",
+    "tablet" : "#{$breakpoint-tablet-px-sans}"
+  }%';
+}
+
+.config {
+  &:before{
+    content: print-breakpoints();
+  }
+}

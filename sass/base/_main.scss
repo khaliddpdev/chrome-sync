@@ -1,0 +1,11 @@
+@import "compass";
+@import "../helpers/-all";
+/*	==================================================
+	Main
+	==================================================  */
+
+body{
+  @include animate-fadeInDown();
+  @include animation(fadeInDown $duration-transition-default-ms $timing-transition-default);
+  width: pixel-to-em-final(480);
+}

@@ -1,0 +1,4 @@
+/* line 13, ../sass/config.scss */
+.config:before {
+  content: '\a   %{\a     "mobile" : "768",\a     "tablet" : "1024"\a   }%';
+}
