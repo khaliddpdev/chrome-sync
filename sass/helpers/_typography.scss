@@ -1,17 +1,17 @@
-@import 'compass';
+//@import 'compass';
 @import 'functions';
 @import 'variables';
 
-@font-face {
-  font-family: 'fontello';
-  src: url('../fonts/fontello.eot?2865792');
-  src: url('../fonts/fontello.eot?2865792#iefix') format('embedded-opentype'),
-  url('../fonts/fontello.woff?2865792') format('woff'),
-  url('../fonts/fontello.ttf?2865792') format('truetype'),
-  url('../fonts/fontello.svg?2865792#fontello') format('svg');
-  font-weight: normal;
-  font-style: normal;
-}
+//@font-face {
+//  font-family: 'fontello';
+//  src: url('../font/fontello.eot?2865792');
+//  src: url('../font/fontello.eot?2865792#iefix') format('embedded-opentype'),
+//  url('../font/fontello.woff?2865792') format('woff'),
+//  url('../font/fontello.ttf?2865792') format('truetype'),
+//  url('../font/fontello.svg?2865792#fontello') format('svg');
+//  font-weight: normal;
+//  font-style: normal;
+//}
 
 @mixin content-icon($name){
   font-family: 'fontello';
@@ -21,15 +21,44 @@
   font-variant: normal;
   text-transform: none;
 
-  @each $media-name, $char in
+  @each $media-name, $char  in
+                  (email, $char-icon-default),
+                  (behance, $char-icon-default),
+                  (dribbble, $char-icon-default),
                   (facebook, $char-icon-fb),
+                  (instagram, $char-icon-default),
+                  (google, $char-icon-email),
+                  (linkedin, $char-icon-ln),
+                  (pinterest, $char-icon-default),
+                  (snapchat, $char-icon-email),
+                  (tel, $char-icon-default),
+                  (tumblr, $char-icon-email),
                   (twitter, $char-icon-tw),
-                  (youtube, $char-icon-yt),
-                  (instagram, $char-icon-in),
-                  (linkedin, $char-icon-ln) {
+                  (youtube, $char-icon-default),
+                  (vimeo, $char-icon-email) {
 
     @if ($media-name == $name){
       content: $char;
     }
   }
 }
+
+//@mixin font-a($font-weight: false) {
+//  font-family: sans-serif;
+//
+//  @if ($font-weight){
+//    @if(type_of($font-weight) == 'string'){
+//      $font-weights : ( ("regular": 400),("semi-bold": 500), ("bold": 700));
+//      font-weight: map_get($font-weights, to-lower_case($font-weight));
+//    } @else {
+//      font-weight: $font-weight;
+//    }
+//  }
+//}
+
+//@mixin font-b($font-weight: false) {
+//  font-family: 'Sansita One', cursive;
+//  @if ($font-weight){
+//    font-weight: $font-weight;
+//  }
+//}

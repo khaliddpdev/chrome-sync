@@ -1,11 +1,47 @@
-@import "compass";
-@import "../helpers/-all";
+@import "../external/compass-mixins/animation/animate/fading/fading-entrances";
+
 /*	==================================================
 	Main
 	==================================================  */
 
-body{
-  @include animate-fadeInDown();
+window {
   @include animation(fadeInDown $duration-transition-default-ms $timing-transition-default);
-  width: pixel-to-em-final(480);
+}
+
+body {
+  //@include animation(fadeInDown $duration-transition-default-ms $timing-transition-default);
+  margin: 0;
+  width: em(320);
+}
+
+.wrap-title {
+  padding: em(12);
+
+  h1 {
+    color:  lighten(black, 25%);
+  }
+}
+
+.toggle-state {
+  @include default-transition(background-color);
+  border: 0;
+  background-color: lighten(green, 15%);
+  width: 100%;
+
+  &:before {
+    @include inline-block();
+    color: $color-white;
+    content: 'On';
+    font-weight: bold;
+    padding: em(12);
+  }
+
+  &.inactive {
+    background-color: lighten(red, 15%);
+
+    &:before {
+      content: 'Off';
+    }
+
+  }
 }
