@@ -26,6 +26,8 @@ body {
   @include default-transition(background-color);
   border: 0;
   background-color: lighten(green, 15%);
+  display: block;
+  text-align: center;
   width: 100%;
 
   &:before {

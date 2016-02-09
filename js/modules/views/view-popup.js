@@ -17,7 +17,8 @@ define([
             events: {
                 'click .toggle-state': 'toggle'
             },
-            toggle: function () {
+            toggle: function (evt) {
+                if(evt && evt.preventDefault) evt.preventDefault();
                 var isActive = state.get('active');
                 state.set('active', !isActive);
             },
@@ -31,8 +32,8 @@ define([
         });
 
     var chromeWindows = chrome.extension.getViews(),
-        _window = chromeWindows[1],
-        el = _window.document.getElementById('container-popup');
+        _backgroundWindow = chromeWindows[0],
+        el = _backgroundWindow.document.getElementById('container-popup');
     Namespace.PopupView = (el) ? new PopupView({el: el}) : PopupView;
     return PopupView;
 });

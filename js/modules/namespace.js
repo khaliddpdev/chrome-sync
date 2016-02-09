@@ -1,4 +1,5 @@
 define([],function(){
-    window.ChromeReloader = window.ChromeReloader || {};
-    return window.ChromeReloader;
+    var namespace = 'chromeSync';
+    window[namespace] = window[namespace] || {};
+    return window[namespace];
 });

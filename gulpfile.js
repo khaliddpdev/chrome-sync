@@ -66,7 +66,7 @@ gulp.task('jade', function () {
         .on('error', onError)
         .pipe(gulp.dest(function(file){
             var basename = path.parse(file.path).base;
-            return ((basename == 'index.html')? './' : './views/')
+            return ((basename == 'index.html')? './' : './views/');
         }));
     //console.log('Saved php files from '+jadeFilesPattern + ' to '+saveDirectory);
 });
