@@ -12,54 +12,56 @@ define([
             state = require('state'),
             config = require('config'),
             _ = require('underscore'),
-            socket = io(config.chromeSync.server),
-            tabRegex = config.chromeSync.tabRegex,
-            ignoreRegex = config.chromeSync.ignoreTabRegex;
+            socket = io(config.chromeSync.server);
 
 
         socket.on('refresh', function (data) {
-            if (state.get('active')) {
+            console.log('received: %o', data);
+            if (state.get('isActive')) {
                 chrome.tabs.query({
                     currentWindow: true
-                }, function (tabs) {
-                    var reloaded = false;
+                }, function (currentTabsMeta) {
+                    var hasBrowserReloaded = false,
+                        tabRegex = new RegExp(data.tabRegex, 'i'),
+                        ignoreRegex = new RegExp(data.ignoreTabRegex, 'i');
 
-                    _.forEach(tabs, function (tab, index, arr) {
-                        var url = String(tab.url);
-                        if (tabRegex.test(url) && !ignoreRegex.test(url)) {
-                            chrome.tabs.reload(tab.id);
-                            reloaded = true;
+                    _.forEach(currentTabsMeta, function (tabMeta) {
+                        var url = tabMeta.url.toString();
+                        if (url.match(tabRegex) && !url.match(ignoreRegex)) {
+                            console.log('found %s', url);
+                            chrome.tabs.reload(tabMeta.id);
+                            hasBrowserReloaded = true;
                         }
                     });
 
                     socket.emit('received:refresh', {
                         type: 'refresh',
                         result: {
-                            success : true,
-                            actionTaken: reloaded
+                            success: true,
+                            actionTaken: hasBrowserReloaded
                         },
-                        success : true
+                        success: true
                     });
                 });
             } else {
                 socket.emit('received:refresh', {
                     type: 'refresh-invalid',
                     result: {
-                        success : false,
+                        success: false,
                         actionTaken: false
                     },
-                    reason : 'chrome-sync is not active'
+                    reason: 'chrome-sync is not active'
                 });
             }
         });
 
         socket.on('stop', function (data) {
-            state.set('active', false);
+            state.set('isActive', false);
             chrome.tabs.reload();
         });
 
         socket.on('start', function (data) {
-            state.set('active', true);
+            state.set('isActive', true);
             chrome.tabs.reload();
         });
 
@@ -68,7 +70,7 @@ define([
             socket.emit('received:test', {
                 type: 'test',
                 result: {
-                    success : true,
+                    success: true,
                     actionTaken: false
                 }
             });

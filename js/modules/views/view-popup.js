@@ -11,19 +11,18 @@ define([
             initialize: function () {
                 console.log('PopupView.initialize()');
                 this.$toggleState = this.$('.toggle-state');
-                this.listenTo(state, 'change:active', this.render);
+                this.listenTo(state, 'change:isActive', this.render);
                 this.render();
             },
             events: {
-                'click .toggle-state': 'toggle'
+                'click .toggle-state': 'toggleState'
             },
-            toggle: function (evt) {
+            toggleState: function (evt) {
                 if(evt && evt.preventDefault) evt.preventDefault();
-                var isActive = state.get('active');
-                state.set('active', !isActive);
+                state.set('isActive', !state.get('isActive'));
             },
             render: function () {
-                if(state.get('active')){
+                if(state.get('isActive')){
                     this.$toggleState.removeClass('inactive');
                 } else {
                     this.$toggleState.addClass('inactive');
@@ -32,8 +31,8 @@ define([
         });
 
     var chromeWindows = chrome.extension.getViews(),
-        _backgroundWindow = chromeWindows[0],
-        el = _backgroundWindow.document.getElementById('container-popup');
+        backgroundWindow = chromeWindows[0],
+        el = backgroundWindow.document.getElementById('container-popup');
     Namespace.PopupView = (el) ? new PopupView({el: el}) : PopupView;
     return PopupView;
 });

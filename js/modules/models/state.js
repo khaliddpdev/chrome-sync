@@ -5,7 +5,7 @@ define([
     var Backbone = require('backbone'),
         ChromeSyncState = Backbone.Model.extend({
            defaults : {
-               active : true
+               isActive : true
            }
         });
 

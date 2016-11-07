@@ -1,177 +1,165 @@
-var fs = require('fs'),
-    path = require('path'),
-    exec = require('child_process').exec,
-    glob = require('glob'),
+// template gulpfile
+// working gulpfile should be in root of project and named 'gulpfile.js'
+
+var path = require('path'),
+
     gulp = require('gulp'),
-    customJade = require('jade'),
-    jade = require('gulp-jade'),
-    _ = require('lodash'),
-    argv = require('yargs').argv,
-    rename = require('gulp-rename'),
-    concat = require('gulp-concat'),
-    request = require('request'),
-    sass = require('gulp-sass'),
-    sourcemaps = require('gulp-sourcemaps'),
-    libsass = require('node-sass'),
-    through2 = require('through2'),
-    beautifyJS = require('js-beautify'),
-    projectDirectory = path.resolve(__dirname, './');
 
-gulp.task('sass', function () {
-    var sassPath = path.resolve(projectDirectory, 'sass/'),
-        writePath = path.resolve(projectDirectory, 'stylesheets/'),
-        watchPath = path.join(sassPath , '/[!_]*[!(compass)].scss'),
-        includes = [
-            path.resolve(projectDirectory, 'sass/external/compass-mixins')
-        ];
+    lib = function(moduleName){ return require('gulp-utils/lib/'+path.normalize(moduleName)); },
 
+    project = lib('project'),
+    utils = lib('utils');
 
-    gulp.src(watchPath)
-        .pipe(sourcemaps.init())
-        .pipe(sass({
-            includePaths: includes,
-            style: 'expanded', //nested, expanded, compact, compressed,
-            indentedSyntax : false
-        }).on('error', sass.logError))
-        .pipe(sourcemaps.write())
-        .pipe(gulp.dest(writePath));
-});
+// dev task that watches and executes appropriate tasks as necessary
+gulp.task('auto', function(){
+    gulp.watch(utils.buildGlobSelector(project.tasks['pug-php'], '/**/*.pug'), ['pug-php']);
+    // gulp.watch(utils.buildGlobSelector(project.tasks['stylus'], '/**/*.styl'), ['stylus']);
+    gulp.watch(utils.buildGlobSelector(project.tasks['stylus-bem'], '/**/*.styl'), ['stylus-bem']);
+    // gulp.watch(utils.buildGlobSelector(project.tasks['pug-html'], '/**/*.pug'), ['pug-html']);
+    // gulp.watch(utils.buildGlobSelector(project.tasks['jsx'], '{**,!node_modules,!vendors}/**/*.jsx'), ['babel']);
+    // gulp.watch(utils.buildGlobSelector(project.tasks['sass'], '/**/*.scss'), ['sass']);
+    
+    // autoformat pug files on save
+    //gulp.watch(utils.buildGlobSelector(project.tasks['pug'], '/**/*.pug'), function(event){
+    //    lib('pug').beautify({
+    //        tasks : [
+    //            {
+    //                input : path.dirname(event.path),
+    //                suffix : path.basename(event.path)
+    //            }
+    //        ]
+    //    });
+    //});
 
-gulp.task('sass-debug', function(){
-    var sassPath = path.resolve(projectDirectory, 'sass/'),
-        writePath = path.resolve(projectDirectory, 'stylesheets/'),
-        watchPath = path.join(sassPath , 'style.scss');
+    // autoformat javascript files on save
+    // gulp.watch(utils.buildGlobSelector(project.tasks['js'],'/{**,!node_modules,!vendors}/**/*.js'), function(event){
+    //     lib('javascript').beautify({
+    //         tasks : [
+    //             {
+    //                 input : path.dirname(event.path),
+    //                 suffix : path.basename(event.path)
+    //             }
+    //         ]
+    //     });
+    // });
 
-    var includes = [ path.resolve(projectDirectory, 'sass/external/compass-mixins') ];
-    console.log('includes:', includes);
+    // render jsx files on save
+    // gulp.watch(utils.buildGlobSelector(project.tasks['jsx'],'/{**, !node_modules,!vendors}/**/*.jsx'), function(event){
+    //     lib('babel').compile({
+    //         tasks : [
+    //             {
+    //                 input : path.dirname(event.path),
+    //                 output : path.basename(event.path)
+    //             }
+    //         ]
+    //     });
+    // });
 
-    libsass.render({
-        includePaths: includes,
-        file: watchPath,
-        functions: SassFunctions
-    }, function(err, result) {
-        console.log(arguments);
+    lib('project/chrome-sync').start(function(){
+        console.log('chrome-sync active...');
     });
 });
+// CSS tasks
 
-gulp.task('jade', function () {
-    var jadeDirectory = path.resolve(projectDirectory, 'jade/'),
-        jadeGlob = path.join(jadeDirectory, '/**/[^_]*.jade');
+gulp.task('stylus', lib('stylus').compile);
 
-    //console.log('Analyzing files within: %s', jadeGlob);
-    gulp.src(jadeGlob)
-        .pipe(jade({
-            pretty: true
-        }))
-        .on('error', onError)
-        .pipe(gulp.dest(function(file){
-            var basename = path.parse(file.path).base;
-            return ((basename == 'index.html')? './' : './views/');
-        }));
-    //console.log('Saved php files from '+jadeFilesPattern + ' to '+saveDirectory);
+gulp.task('stylus-bem', lib('stylus').compileBEM);
+
+gulp.task('stylus-auto', function(){
+    gulp.watch(utils.buildGlobSelector(project.tasks['stylus'], '**/*.styl'), ['stylus']);
 });
 
-gulp.task('jade-debug', function () {
-    var jadeDirectory = path.resolve(projectDirectory, 'jade/'),
-        jadeFilesPattern = path.join(jadeDirectory, '/**/[^_]*.jade');
-    console.log('Jade: %j', customJade);
-    gulp.src(jadeFilesPattern)
-        .pipe(through2.obj({ allowHalfOpen: false },
-            function (file, encoding, done) {
-
-                //console.log('chunk.path: %j', chunk.path);
-                var html = customJade.render(file.contents.toString(), {
-                    filename: file.path,
-                    pretty: (argv['pretty']) ? true : false
-                });
-                //console.log('html: %s', html);
-                file.contents = new Buffer(html, encoding);
-                done(null, file); // note we can use the second argument on the callback
-                // to provide data as an alternative to this.push('wut?')
-            }
-        ))
-        .on('error', onError)
-        .pipe(gulp.dest(projectDirectory));
-    //console.log('Saved php files from '+jadeFilesPattern + ' to '+saveDirectory);
+gulp.task('stylus-bem-auto', function(){
+    gulp.watch(utils.buildGlobSelector(project.tasks['stylus-bem'], '**/*.styl'), ['stylus-bem']);
 });
 
-gulp.task('jade-auto', function () {
-    var jadeDirectory = path.resolve(projectDirectory, 'jade/');
-    gulp.watch(path.join(jadeDirectory, '/**/*.jade'), ['jade']);
+gulp.task('less', lib('less').compile);
+
+gulp.task('sass', lib('sass').compile);
+
+gulp.task('sass-debug', lib('sass').debug);
+
+gulp.task('sass-auto', function(){
+    gulp.watch(utils.buildGlobSelector(project.tasks['sass'], '**/*.{scss,sass}'), ['sass']);
 });
 
-gulp.task('auto', function () {
-    var jadeDirectory = path.resolve(projectDirectory, 'jade/'),
-        cssConfigPath = path.resolve(projectDirectory, 'stylesheets/config.css'),
-        sassDirectory = path.resolve(projectDirectory, 'sass/');
+gulp.task('compass', lib('sass').compass);
 
-    gulp.watch(path.join(jadeDirectory, '/**/*.jade'), ['jade']);
-    gulp.watch(path.join(sassDirectory, '/**/*.scss'), ['sass']);
+
+// Pug/Jade tasks
+gulp.task('pug-2-stylus', lib('pug').pug2Stylus);
+
+gulp.task('pug-php', lib('pug').php);
+
+gulp.task('pug-php-auto', function(){
+    gulp.watch(utils.buildGlobSelector(project.tasks['pug-php'], '/**/*.pug'), ['pug-php']);
 });
 
-gulp.task('beautify-js', function () {
-    var writePath = './',
-        projectJSPath = path.join(projectDirectory, 'js/'),
-        watchPath = path.join(projectJSPath, '/!(vendors)/**/*.js');
+gulp.task('pug-html', lib('pug').html);
 
-    console.log('Search %s for javascript files', watchPath);
-    gulp.src(watchPath)
-        .pipe(through2.obj({
-                allowHalfOpen: false
-            },
-            function (file, encoding, done) {
-                console.log('reading: %s', file.path);
-                if (file && file.contents) {
-
-                    var jsContent = beautifyJS(file.contents.toString());
-                    writePath = file.path;
-                    //console.log('js: %s', jsContent);
-                    file.contents = new Buffer(jsContent, encoding);
-                }
-                done(null, file); // note we can use the second argument on the callback
-                // to provide data as an alternative to this.push('wut?')
-            }
-        ))
-        .on('error', console.error)
-        .pipe(gulp.dest(writePath));
+gulp.task('pug-html-auto', function(){
+    gulp.watch(utils.buildGlobSelector(project.tasks['pug-html'], '/**/*.pug'), ['pug-html']);
 });
 
-gulp.task('beautify-js-auto', function () {
-    var writePath = './',
-        projectJSPath = path.join(projectDirectory, 'js/'),
-        watchPath = path.join(projectJSPath, '/!(vendors)/**/*.js');
+gulp.task('pug-php-debug', lib('pug').phpDebug);
 
-    console.log('Search %s for javascript files', watchPath);
-    gulp.watch(watchPath, function (event) {
+gulp.task('pug-ejs', lib('pug').ejs);
 
-        if(event.type == 'changed'){
-
-            fs.readFile(event.path, 'utf8', function (err, data) {
-                if (err) {
-                    throw err;
-                }
-                console.log('updating %s', event.path);
-                fs.writeFileSync(event.path, beautifyJS(data));
-            });
-        }
-    })
+gulp.task('pug-ejs-auto', function(){
+    gulp.watch(utils.buildGlobSelector(project.tasks['pug-ejs'], '/**/*.pug'), ['pug-ejs']);
 });
 
-gulp.task('test-js', function(){
-    exec('jasmine', function (err, stdout, stderr) {
-        console.log('results:\n %s\nerror:\n%s', stdout, stderr);
-    });
+gulp.task('html-2-pug', lib('pug').html2Pug);
+
+gulp.task('php-2-pug', lib('pug').php2Pug);
+
+gulp.task('jade-php', lib('jade').php);
+
+gulp.task('jade-ejs', lib('jade').ejs);
+
+gulp.task('jade-html', lib('jade').html);
+
+gulp.task('pug-beautify', lib('pug').beautify);
+
+
+// Javascript tasks
+gulp.task('build-js-config', lib('javascript').config);
+
+gulp.task('beautify-js', lib('javascript').beautify);
+
+gulp.task('beautify-js-auto', function(){
+    gulp.watch(utils.buildGlobSelector(project.tasks['js'], '{**,!node_modules,!vendors)/*.js'), ['beautify-js']);
 });
 
-gulp.task('build-js', function () {
+gulp.task('test-js', lib('javascript').test);
 
-    var rjsCmd = (require('os').platform() == 'linux')?'r.js':'r.js.cmd';
-    exec(rjsCmd+' -o js/build.js', function (err, stdout, stderr) {
-        console.log('err:\n%s\n\nresults:\n%s\n\nstderr:\n%s', err, stdout, stderr);
-    })
+gulp.task('build-js', lib('javascript').build);
+
+gulp.task('build-webpack', lib('javascript').buildWebpack);
+
+gulp.task('build-rjs', lib('javascript').buildRequireJS);
+
+gulp.task('jsx', lib('babel').compile);
+
+//WordPress tasks
+gulp.task('init-wp-config', lib('wordpress').init);
+
+gulp.task('init-project',  lib('project').init);
+
+gulp.task('init-avocode', lib('avocode').init);
+
+
+// Babel tasks
+gulp.task('babel', lib('babel').compile);
+
+gulp.task('babel-auto', function(){
+    gulp.watch(utils.buildGlobSelector(project.tasks['jsx'], '{**,!node_modules,!vendors)/**/*.jsx'), ['babel']);
 });
 
-function onError(err) {
-    console.log(err);
-    this.emit('end');
-}
+
+// Project tasks
+gulp.task('ftp', lib('ftp').sync);
+
+gulp.task('ftp-auto', function(){
+    gulp.watch(utils.buildGlobSelector(project.tasks['ftp'], ''), ['ftp']);
+});
